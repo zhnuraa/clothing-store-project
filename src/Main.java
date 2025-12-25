@@ -1,7 +1,7 @@
 public class Main {
     public static void main(String[] args) {
-        System.out.println("=== Clothing Store Management System (Week 2 Demo) ===\n");
-        System.out.println("--- 1) Creating Objects (Parameterized + Default Constructors) ---");
+        System.out.println("=== Clothing Store Management System===\n");
+        System.out.println("1) Creating Objects");
       
         ClothingItem item1 = new ClothingItem(101, "Hoodie", "M", 42000.0, "Nike");
         ClothingItem item2 = new ClothingItem(102, "Jeans", "32", 28000.0, "Levi's");
@@ -12,7 +12,7 @@ public class Main {
 
         Order order1 = new Order(9001, customer1.getName(), 0.0, Order.Status.PENDING);
         Order order2 = new Order();
-        System.out.println("\n--- 2) Initial Objects (toString) ---");
+        System.out.println("\n2) Initial Objects");
         System.out.println("item1: " + item1);
         System.out.println("item2: " + item2);
         System.out.println("item3: " + item3);
@@ -21,7 +21,7 @@ public class Main {
         System.out.println("order1: " + order1);
         System.out.println("order2: " + order2);
       
-        System.out.println("\n--- 3) Testing GETTERS (Each Object) ---");
+        System.out.println("\n3) Testing GETTERS");
         System.out.println("item1 getters -> id=" + item1.getItemId() + ", name=" + item1.getName() +
                 ", size=" + item1.getSize() + ", price=" + item1.getPrice() + ", brand=" + item1.getBrand());
 
@@ -43,7 +43,7 @@ public class Main {
         System.out.println("order2 getters -> id=" + order2.getOrderId() + ", customerName=" + order2.getCustomerName() +
                 ", total=" + order2.getTotal() + ", status=" + order2.getStatus());
 
-        System.out.println("\n--- 4) Testing SETTERS (Each Object) ---");
+        System.out.println("\n4) Testing SETTERS");
 
         item2.setPrice(30000.0);
         item2.setSize("34");
@@ -74,7 +74,7 @@ public class Main {
         order2.setStatus(Order.Status.PENDING);
         System.out.println("order2 updated with setters: " + order2);
 
-        System.out.println("\n--- 5) Testing ADDITIONAL METHODS (Real Logic) ---");
+        System.out.println("\n5) Testing ADDITIONAL METHODS");
 
       
         System.out.println("item1 isPremium (price > 35000): " + item1.isPremium());
@@ -112,7 +112,7 @@ public class Main {
         order2.cancel();
         System.out.println("order2 after cancel(): " + order2);
 
-        System.out.println("\n--- 6) Final State (toString) ---");
+        System.out.println("\n 6) Final State");
         System.out.println(item1);
         System.out.println(item2);
         System.out.println(item3);
