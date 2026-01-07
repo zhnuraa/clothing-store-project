@@ -2,15 +2,17 @@ public class ClothingItem {
     private int itemId;
     private String name;
     private String size;
-    private double price;
+    private double price;       
     private String brand;
+    private int stockQuantity;
 
-    public ClothingItem(int itemId, String name, String size, double price, String brand) {
-        this.itemId = itemId;
-        this.name = name;
-        this.size = size;
-        this.price = price;
-        this.brand = brand;
+    public ClothingItem(int itemId, String name, String size, double price, String brand, int stockQuantity) {
+        setItemId(itemId);
+        setName(name);
+        setSize(size);
+        setPrice(price);
+        setBrand(brand);
+        setStockQuantity(stockQuantity);
     }
 
     public ClothingItem() {
@@ -19,62 +21,102 @@ public class ClothingItem {
         this.size = "N/A";
         this.price = 0.0;
         this.brand = "No Brand";
+        this.stockQuantity = 0;
     }
 
-    public int getItemId() {
-        return itemId;
-    }
+    // Getters
+    public int getItemId() { return itemId; }
+    public String getName() { return name; }
+    public String getSize() { return size; }
+    public double getPrice() { return price; }
+    public String getBrand() { return brand; }
+    public int getStockQuantity() { return stockQuantity; }
 
-    public String getName() {
-        return name;
-    }
-
-    public String getSize() {
-        return size;
-    }
-
-    public double getPrice() {
-        return price;
-    }
-
-    public String getBrand() {
-        return brand;
-    }
-
+    // Setters
     public void setItemId(int itemId) {
-        this.itemId = itemId;
+        if (itemId < 0) {
+            System.out.println("Invalid itemId. Setting itemId = 0.");
+            this.itemId = 0;
+        } else {
+            this.itemId = itemId;
+        }
     }
 
     public void setName(String name) {
-        this.name = name;
+        if (name == null || name.trim().isEmpty()) {
+            System.out.println("Invalid name. Setting name = 'Unknown Item'.");
+            this.name = "Unknown Item";
+        } else {
+            this.name = name.trim();
+        }
     }
 
     public void setSize(String size) {
-        this.size = size;
+        if (size == null || size.trim().isEmpty()) {
+            System.out.println("Invalid size. Setting size = 'N/A'.");
+            this.size = "N/A";
+        } else {
+            this.size = size.trim();
+        }
     }
 
     public void setPrice(double price) {
-        this.price = price;
+        if (price < 0) {
+            System.out.println("Invalid price. Setting price = 0.0.");
+            this.price = 0.0;
+        } else {
+            this.price = price;
+        }
     }
 
     public void setBrand(String brand) {
-        this.brand = brand;
+        if (brand == null || brand.trim().isEmpty()) {
+            System.out.println("Invalid brand. Setting brand = 'No Brand'.");
+            this.brand = "No Brand";
+        } else {
+            this.brand = brand.trim();
+        }
     }
-    // Method 1: Apply discount to price
+
+    public void setStockQuantity(int stockQuantity) {
+        if (stockQuantity < 0) {
+            System.out.println("Invalid stock. Setting stockQuantity = 0.");
+            this.stockQuantity = 0;
+        } else {
+            this.stockQuantity = stockQuantity;
+        }
+    }
+
+    // Additional methods
     public void applyDiscount(double percentage) {
         if (percentage < 0 || percentage > 100) {
             System.out.println("Invalid discount: " + percentage + "%. No changes applied.");
             return;
         }
-        this.price = this.price * (1 - percentage / 100.0);
+        price = price * (1 - percentage / 100.0);
     }
 
-    // Method 2: Premium check (YOUR rule: price > 35000 KZT)
     public boolean isPremium() {
-        return this.price > 35000.0;
+        return price > 35000.0;
     }
 
-    // 7) toString()
+    public boolean isInStock() {
+        return stockQuantity > 0;
+    }
+
+    public boolean reduceStock(int amount) {
+        if (amount <= 0) {
+            System.out.println("Amount must be positive.");
+            return false;
+        }
+        if (amount > stockQuantity) {
+            System.out.println("Not enough stock.");
+            return false;
+        }
+        stockQuantity -= amount;
+        return true;
+    }
+
     @Override
     public String toString() {
         return "ClothingItem{" +
@@ -83,6 +125,7 @@ public class ClothingItem {
                 ", size='" + size + '\'' +
                 ", price=" + price +
                 ", brand='" + brand + '\'' +
+                ", stockQuantity=" + stockQuantity +
                 '}';
     }
 }
