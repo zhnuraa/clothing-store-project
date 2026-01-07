@@ -5,10 +5,10 @@ public class Customer {
     private int points;
 
     public Customer(int customerId, String name, String preferredSize, int points) {
-        this.customerId = customerId;
-        this.name = name;
-        this.preferredSize = preferredSize;
-        this.points = points;
+        setCustomerId(customerId);
+        setName(name);
+        setPreferredSize(preferredSize);
+        setPoints(points);
     }
 
     public Customer() {
@@ -18,38 +18,50 @@ public class Customer {
         this.points = 0;
     }
 
-    public int getCustomerId() {
-        return customerId;
-    }
+    // Getters
+    public int getCustomerId() { return customerId; }
+    public String getName() { return name; }
+    public String getPreferredSize() { return preferredSize; }
+    public int getPoints() { return points; }
 
-    public String getName() {
-        return name;
-    }
-
-    public String getPreferredSize() {
-        return preferredSize;
-    }
-
-    public int getPoints() {
-        return points;
-    }
-
+    // Setters
     public void setCustomerId(int customerId) {
-        this.customerId = customerId;
+        if (customerId < 0) {
+            System.out.println("Invalid customerId. Setting customerId = 0.");
+            this.customerId = 0;
+        } else {
+            this.customerId = customerId;
+        }
     }
 
     public void setName(String name) {
-        this.name = name;
+        if (name == null || name.trim().isEmpty()) {
+            System.out.println("Invalid name. Setting name = 'Unknown Customer'.");
+            this.name = "Unknown Customer";
+        } else {
+            this.name = name.trim();
+        }
     }
 
     public void setPreferredSize(String preferredSize) {
-        this.preferredSize = preferredSize;
+        if (preferredSize == null || preferredSize.trim().isEmpty()) {
+            System.out.println("Invalid preferredSize. Setting preferredSize = 'N/A'.");
+            this.preferredSize = "N/A";
+        } else {
+            this.preferredSize = preferredSize.trim();
+        }
     }
 
     public void setPoints(int points) {
-        this.points = points;
+        if (points < 0) {
+            System.out.println("Invalid points. Setting points = 0.");
+            this.points = 0;
+        } else {
+            this.points = points;
+        }
     }
 
+    // Additional methods
     public void addPoints(int points) {
         if (points <= 0) {
             System.out.println("Points must be positive. No changes applied.");
@@ -63,7 +75,9 @@ public class Customer {
     }
 
     public String getProfile() {
-        return "Customer#" + customerId + " " + name + " | preferredSize=" + preferredSize + " | points=" + points;
+        return "Customer#" + customerId + " " + name +
+                " | preferredSize=" + preferredSize +
+                " | points=" + points;
     }
 
     @Override
