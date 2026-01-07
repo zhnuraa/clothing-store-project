@@ -24,7 +24,7 @@ public class Customer {
     public String getPreferredSize() { return preferredSize; }
     public int getPoints() { return points; }
 
-    // Setters
+    // Setters with validation
     public void setCustomerId(int customerId) {
         if (customerId < 0) {
             System.out.println("Invalid customerId. Setting customerId = 0.");
@@ -61,7 +61,7 @@ public class Customer {
         }
     }
 
-    // Additional methods
+    // Business logic
     public void addPoints(int points) {
         if (points <= 0) {
             System.out.println("Points must be positive. No changes applied.");
