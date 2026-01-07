@@ -2,7 +2,7 @@ public class ClothingItem {
     private int itemId;
     private String name;
     private String size;
-    private double price;       
+    private double price;
     private String brand;
     private int stockQuantity;
 
@@ -32,7 +32,7 @@ public class ClothingItem {
     public String getBrand() { return brand; }
     public int getStockQuantity() { return stockQuantity; }
 
-    // Setters
+    // Setters with validation
     public void setItemId(int itemId) {
         if (itemId < 0) {
             System.out.println("Invalid itemId. Setting itemId = 0.");
@@ -87,7 +87,6 @@ public class ClothingItem {
         }
     }
 
-    // Additional methods
     public void applyDiscount(double percentage) {
         if (percentage < 0 || percentage > 100) {
             System.out.println("Invalid discount: " + percentage + "%. No changes applied.");
@@ -104,17 +103,26 @@ public class ClothingItem {
         return stockQuantity > 0;
     }
 
+    // Reduce stock when item is added to an order
     public boolean reduceStock(int amount) {
         if (amount <= 0) {
             System.out.println("Amount must be positive.");
             return false;
         }
         if (amount > stockQuantity) {
-            System.out.println("Not enough stock.");
+            System.out.println("Not enough stock. Available: " + stockQuantity);
             return false;
         }
         stockQuantity -= amount;
         return true;
+    }
+
+    public void increaseStock(int amount) {
+        if (amount <= 0) {
+            System.out.println("Amount must be positive.");
+            return;
+        }
+        stockQuantity += amount;
     }
 
     @Override
