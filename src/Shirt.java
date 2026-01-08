@@ -7,7 +7,7 @@ public class Shirt extends ClothingItem {
 
     public Shirt(int itemId, String name, String size, double price, String brand, int stockQuantity,
                  SleeveType sleeveType, String material) {
-        super(itemId, name, size, price, brand, stockQuantity); // super() -> parent constructor
+        super(itemId, name, size, price, brand, stockQuantity);
         setSleeveType(sleeveType);
         setMaterial(material);
     }
@@ -18,9 +18,8 @@ public class Shirt extends ClothingItem {
         this.material = "Cotton";
     }
 
-    public SleeveType getSleeveType() {
-        return sleeveType;
-    }
+    public SleeveType getSleeveType() { return sleeveType; }
+    public String getMaterial() { return material; }
 
     public void setSleeveType(SleeveType sleeveType) {
         if (sleeveType == null) {
@@ -29,10 +28,6 @@ public class Shirt extends ClothingItem {
         } else {
             this.sleeveType = sleeveType;
         }
-    }
-
-    public String getMaterial() {
-        return material;
     }
 
     public void setMaterial(String material) {
@@ -44,7 +39,7 @@ public class Shirt extends ClothingItem {
         }
     }
 
-    // ===== Overrides (polymorphic behavior) =====
+    // Polymorphic behavior (overrides)
     @Override
     public String getType() {
         return "Shirt";
@@ -52,7 +47,6 @@ public class Shirt extends ClothingItem {
 
     @Override
     public String getCareInstructions() {
-        // simple logic based on material
         if (material.equalsIgnoreCase("wool")) {
             return "Wool care: hand wash cold, air dry.";
         }
@@ -66,6 +60,11 @@ public class Shirt extends ClothingItem {
                 ", material='" + material + "'";
     }
 
+    // Child-only method (for instanceof + casting demo)
+    public void foldSleeves() {
+        System.out.println("Shirt action: folding sleeves (" + sleeveType + ").");
+    }
+
     @Override
     public String toString() {
         return "Shirt{" +
@@ -73,10 +72,5 @@ public class Shirt extends ClothingItem {
                 ", sleeveType=" + sleeveType +
                 ", material='" + material + '\'' +
                 '}';
-    }
-
-    // ===== method only for Shirt (for instanceof + casting demo) =====
-    public void foldSleeves() {
-        System.out.println("Shirt action: folding sleeves (" + sleeveType + ").");
     }
 }
