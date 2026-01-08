@@ -87,6 +87,7 @@ public class ClothingItem {
         }
     }
 
+    // Business logic (Week 3)
     public void applyDiscount(double percentage) {
         if (percentage < 0 || percentage > 100) {
             System.out.println("Invalid discount: " + percentage + "%. No changes applied.");
@@ -103,7 +104,6 @@ public class ClothingItem {
         return stockQuantity > 0;
     }
 
-    // Reduce stock when item is added to an order
     public boolean reduceStock(int amount) {
         if (amount <= 0) {
             System.out.println("Amount must be positive.");
@@ -123,6 +123,25 @@ public class ClothingItem {
             return;
         }
         stockQuantity += amount;
+    }
+
+    // ===== Week 4: polymorphism methods (children will override) =====
+    public String getType() {
+        return "ClothingItem";
+    }
+
+    public String getCareInstructions() {
+        return "Standard care: wash at 30°C, do not bleach.";
+    }
+
+    public String getDisplayInfo() {
+        return "[" + getType() + "] " +
+                "id=" + itemId +
+                ", name='" + name + '\'' +
+                ", size='" + size + '\'' +
+                ", price=" + price +
+                ", brand='" + brand + '\'' +
+                ", stock=" + stockQuantity;
     }
 
     @Override
