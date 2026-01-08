@@ -32,7 +32,7 @@ public class ClothingItem {
     public String getBrand() { return brand; }
     public int getStockQuantity() { return stockQuantity; }
 
-    // Setters with validation
+    // Setters (validation)
     public void setItemId(int itemId) {
         if (itemId < 0) {
             System.out.println("Invalid itemId. Setting itemId = 0.");
@@ -87,15 +87,7 @@ public class ClothingItem {
         }
     }
 
-    // Business logic (Week 3)
-    public void applyDiscount(double percentage) {
-        if (percentage < 0 || percentage > 100) {
-            System.out.println("Invalid discount: " + percentage + "%. No changes applied.");
-            return;
-        }
-        price = price * (1 - percentage / 100.0);
-    }
-
+    // Week 3 store logic
     public boolean isPremium() {
         return price > 35000.0;
     }
@@ -125,7 +117,7 @@ public class ClothingItem {
         stockQuantity += amount;
     }
 
-    // ===== Week 4: polymorphism methods (children will override) =====
+    // ===== Week 4 polymorphism (children override these) =====
     public String getType() {
         return "ClothingItem";
     }
