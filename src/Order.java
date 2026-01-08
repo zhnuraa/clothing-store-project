@@ -4,32 +4,59 @@ public class Order {
 
     public enum Status { PENDING, COMPLETED, CANCELLED }
 
+    private static class Line {
+        private ClothingItem item;
+        private int quantity;
+
+        Line(ClothingItem item, int quantity) {
+            this.item = item;
+            this.quantity = (quantity <= 0) ? 1 : quantity;
+        }
+
+        ClothingItem getItem() { return item; }
+        int getQuantity() { return quantity; }
+
+        void addQuantity(int add) {
+            if (add > 0) quantity += add;
+        }
+
+        double getLineTotal() {
+            return item.getPrice() * quantity;
+        }
+
+        @Override
+        public String toString() {
+            return "Line{itemId=" + item.getItemId() +
+                    ", name='" + item.getName() + '\'' +
+                    ", qty=" + quantity +
+                    ", unitPrice=" + item.getPrice() +
+                    ", lineTotal=" + getLineTotal() + "}";
+        }
+    }
+
     private int orderId;
     private Customer customer;
-    private ArrayList<OrderLine> lines;
+    private ArrayList<Line> lines;
     private Status status;
 
     public Order(int orderId, Customer customer) {
         setOrderId(orderId);
         setCustomer(customer);
-        this.lines = new ArrayList<OrderLine>();
+        this.lines = new ArrayList<Line>();
         this.status = Status.PENDING;
     }
 
     public Order() {
         this.orderId = 0;
         this.customer = null;
-        this.lines = new ArrayList<OrderLine>();
+        this.lines = new ArrayList<Line>();
         this.status = Status.PENDING;
     }
 
-    // Getters
     public int getOrderId() { return orderId; }
     public Customer getCustomer() { return customer; }
     public Status getStatus() { return status; }
-    public ArrayList<OrderLine> getLines() { return lines; }
 
-    // Setters with validation
     public void setOrderId(int orderId) {
         if (orderId < 0) {
             System.out.println("Invalid orderId. Setting orderId = 0.");
@@ -48,7 +75,6 @@ public class Order {
         }
     }
 
-    // Core logic
     public boolean isPending() {
         return status == Status.PENDING;
     }
@@ -79,23 +105,21 @@ public class Order {
             return false;
         }
 
-        // Reduce stock first (real store behavior)
+        // сначала списываем со склада (реальный магазин)
         boolean reduced = item.reduceStock(quantity);
-        if (!reduced) {
-            return false;
-        }
+        if (!reduced) return false;
 
-        // If item already exists in order, increase quantity
+        // если товар уже в заказе — просто увеличиваем qty
         for (int i = 0; i < lines.size(); i++) {
-            OrderLine line = lines.get(i);
+            Line line = lines.get(i);
             if (line.getItem().getItemId() == item.getItemId()) {
-                line.setQuantity(line.getQuantity() + quantity);
+                line.addQuantity(quantity);
                 return true;
             }
         }
 
-        // Otherwise add a new order line
-        lines.add(new OrderLine(item, quantity));
+        // иначе добавляем новую строку
+        lines.add(new Line(item, quantity));
         return true;
     }
 
@@ -121,12 +145,24 @@ public class Order {
             return;
         }
 
+        // возвращаем stock обратно
         for (int i = 0; i < lines.size(); i++) {
-            OrderLine line = lines.get(i);
+            Line line = lines.get(i);
             line.getItem().increaseStock(line.getQuantity());
         }
 
         status = Status.CANCELLED;
+    }
+
+    // печать строк заказа для Main (без отдачи lines наружу)
+    public void printLines() {
+        if (lines.isEmpty()) {
+            System.out.println("   (empty order)");
+            return;
+        }
+        for (int i = 0; i < lines.size(); i++) {
+            System.out.println("   - " + lines.get(i));
+        }
     }
 
     @Override
