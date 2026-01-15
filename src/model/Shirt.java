@@ -1,3 +1,5 @@
+package model;
+
 public class Shirt extends ClothingItem {
 
     public enum SleeveType { SHORT, LONG }
