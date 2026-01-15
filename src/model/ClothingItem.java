@@ -1,3 +1,5 @@
+package model;
+
 public class ClothingItem {
     private int itemId;
     private String name;
