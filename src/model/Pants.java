@@ -1,3 +1,5 @@
+package model;
+
 public class Pants extends ClothingItem {
 
     public enum FitType { SLIM, REGULAR, OVERSIZED }
