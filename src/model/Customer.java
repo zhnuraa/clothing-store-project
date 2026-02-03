@@ -49,21 +49,8 @@ public class Customer {
         this.points = points;
     }
 
-    // extra methods (Week 2)
-    public void addPoints(int add) {
-        if (add <= 0) throw new InvalidInputException("points to add must be positive");
-        this.points += add;
-    }
-
     public boolean isVIP() {
         return points > 100;
-    }
-
-    public String getProfile() {
-        return "Customer#" + customerId + " " + name +
-                " | preferredSize=" + preferredSize +
-                " | points=" + points +
-                " | VIP=" + isVIP();
     }
 
     @Override
