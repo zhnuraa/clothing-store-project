@@ -1,42 +1,40 @@
 package menu;
 
-import model.*;
+import database.ClothingItemDAO;
 import exception.InvalidInputException;
+import model.ClothingItem;
+import model.Pants;
+import model.Shirt;
 
-import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 
 public class MenuManager implements Menu {
 
     private final Scanner scanner = new Scanner(System.in);
-
-    private final ArrayList<ClothingItem> items = new ArrayList<ClothingItem>();
-    private final ArrayList<Customer> customers = new ArrayList<Customer>();
-    private final ArrayList<Order> orders = new ArrayList<Order>();
+    private final ClothingItemDAO dao = new ClothingItemDAO();
 
     @Override
     public void displayMenu() {
         System.out.println("\n===============================");
-        System.out.println(" CLOTHING STORE SYSTEM");
+        System.out.println(" CLOTHING STORE - Week 8 CRUD");
         System.out.println("===============================");
-        System.out.println("1) Add Shirt");
-        System.out.println("2) Add Pants");
-        System.out.println("3) View All Items");
-        System.out.println("4) Add Customer");
-        System.out.println("5) View All Customers");
-        System.out.println("6) Create Order");
-        System.out.println("7) Add Item To Order");
-        System.out.println("8) View All Orders");
-        System.out.println("9) Complete Order");
-        System.out.println("10) Cancel Order");
+        System.out.println("1) Add Shirt (INSERT)");
+        System.out.println("2) Add Pants (INSERT)");
+        System.out.println("3) View All Items (SELECT)");
+        System.out.println("4) Update Item (UPDATE)");
+        System.out.println("5) Delete Item (DELETE, confirm)");
+        System.out.println("6) Search by Name (ILIKE)");
+        System.out.println("7) Search by Price Range (BETWEEN)");
+        System.out.println("8) Search by Min Price (>=)");
+        System.out.println("9) View Item by ID");
+        System.out.println("10) Increase Stock by ID");
         System.out.println("0) Exit");
         System.out.print("Enter choice: ");
     }
 
     @Override
     public void run() {
-        seedTestData();
-
         boolean running = true;
         while (running) {
             displayMenu();
@@ -45,14 +43,14 @@ public class MenuManager implements Menu {
             switch (choice) {
                 case 1: addShirt(); break;
                 case 2: addPants(); break;
-                case 3: viewAllItems(); break;
-                case 4: addCustomer(); break;
-                case 5: viewAllCustomers(); break;
-                case 6: createOrder(); break;
-                case 7: addItemToOrder(); break;
-                case 8: viewAllOrders(); break;
-                case 9: completeOrder(); break;
-                case 10: cancelOrder(); break;
+                case 3: viewAll(); break;
+                case 4: updateItem(); break;
+                case 5: deleteItemSafe(); break;
+                case 6: searchByName(); break;
+                case 7: searchByRange(); break;
+                case 8: searchByMin(); break;
+                case 9: viewById(); break;
+                case 10: increaseStockById(); break;
                 case 0:
                     running = false;
                     System.out.println("Bye!");
@@ -64,42 +62,41 @@ public class MenuManager implements Menu {
         }
     }
 
-    // ===================== ADD SHIRT =====================
+    // ---------- INSERT ----------
     private void addShirt() {
         System.out.println("\n--- ADD SHIRT ---");
         try {
             int id = readInt("Item ID (>=0): ");
             String name = readNonEmpty("Name: ");
-            String size = readNonEmpty("Size (M/L/XL...): ");
-            double price = readDouble("Price (>=0): ");
+            String size = readNonEmpty("Size: ");
+            double price = readDouble("Price: ");
             String brand = readNonEmpty("Brand: ");
-            int stock = readInt("Stock (>=0): ");
+            int stock = readInt("Stock: ");
 
             int sleeveChoice = readInt("Sleeve (1=SHORT, 2=LONG): ");
             Shirt.SleeveType sleeve = (sleeveChoice == 2) ? Shirt.SleeveType.LONG : Shirt.SleeveType.SHORT;
 
             String material = readNonEmpty("Material: ");
 
-            Shirt shirt = new Shirt(id, name, size, price, brand, stock, sleeve, material);
-            items.add(shirt);
+            Shirt s = new Shirt(id, name, size, price, brand, stock, sleeve, material);
 
-            System.out.println("Added: " + shirt.getDisplayInfo());
+            boolean ok = dao.insertShirt(s);
+            System.out.println(ok ? "Inserted successfully ✅" : "Insert failed ❌");
 
         } catch (InvalidInputException | NumberFormatException e) {
             System.out.println("Error: " + e.getMessage());
         }
     }
 
-    // ===================== ADD PANTS =====================
     private void addPants() {
         System.out.println("\n--- ADD PANTS ---");
         try {
             int id = readInt("Item ID (>=0): ");
             String name = readNonEmpty("Name: ");
-            String size = readNonEmpty("Size (e.g., 34): ");
-            double price = readDouble("Price (>=0): ");
+            String size = readNonEmpty("Size: ");
+            double price = readDouble("Price: ");
             String brand = readNonEmpty("Brand: ");
-            int stock = readInt("Stock (>=0): ");
+            int stock = readInt("Stock: ");
 
             int fitChoice = readInt("Fit (1=SLIM, 2=REGULAR, 3=OVERSIZED): ");
             Pants.FitType fit;
@@ -107,186 +104,196 @@ public class MenuManager implements Menu {
             else if (fitChoice == 3) fit = Pants.FitType.OVERSIZED;
             else fit = Pants.FitType.REGULAR;
 
-            int waist = readInt("Waist (>0): ");
-            int inseam = readInt("Inseam (>0): ");
+            int waist = readInt("Waist: ");
+            int inseam = readInt("Inseam: ");
             String material = readNonEmpty("Material: ");
 
-            Pants pants = new Pants(id, name, size, price, brand, stock, fit, waist, inseam, material);
-            items.add(pants);
+            Pants p = new Pants(id, name, size, price, brand, stock, fit, waist, inseam, material);
 
-            System.out.println("Added: " + pants.getDisplayInfo());
+            boolean ok = dao.insertPants(p);
+            System.out.println(ok ? "Inserted successfully ✅" : "Insert failed ❌");
 
         } catch (InvalidInputException | NumberFormatException e) {
             System.out.println("Error: " + e.getMessage());
         }
     }
 
-    private void viewAllItems() {
-        System.out.println("\n--- ALL ITEMS ---");
+    // ---------- SELECT ----------
+    private void viewAll() {
+        System.out.println("\n--- ALL ITEMS (FROM DB) ---");
+        List<ClothingItem> items = dao.getAllItems();
         if (items.isEmpty()) {
-            System.out.println("No items yet.");
+            System.out.println("No items in database.");
             return;
         }
         for (int i = 0; i < items.size(); i++) {
-            ClothingItem item = items.get(i);
-            System.out.println((i + 1) + ") " + item.getDisplayInfo() +
-                    " | premium=" + item.isPremium() +
-                    " | inStock=" + item.isInStock());
+            System.out.println((i + 1) + ") " + items.get(i).getDisplayInfo());
         }
     }
 
-    // ===================== CUSTOMERS =====================
-    private void addCustomer() {
-        System.out.println("\n--- ADD CUSTOMER ---");
-        try {
-            int id = readInt("Customer ID (>=0): ");
-            String name = readNonEmpty("Name: ");
-            String pref = readNonEmpty("Preferred size: ");
-            int points = readInt("Points (>=0): ");
-
-            Customer c = new Customer(id, name, pref, points);
-            customers.add(c);
-            System.out.println("Added: " + c.getProfile());
-
-        } catch (InvalidInputException | NumberFormatException e) {
-            System.out.println("Error: " + e.getMessage());
-        }
+    private void viewById() {
+        System.out.println("\n--- VIEW BY ID ---");
+        int id = readInt("Item ID: ");
+        ClothingItem item = dao.getById(id);
+        if (item == null) System.out.println("Not found.");
+        else System.out.println(item.getDisplayInfo());
     }
 
-    private void viewAllCustomers() {
-        System.out.println("\n--- ALL CUSTOMERS ---");
-        if (customers.isEmpty()) {
-            System.out.println("No customers yet.");
+    // ---------- UPDATE ----------
+    private void updateItem() {
+        System.out.println("\n--- UPDATE ITEM ---");
+        int id = readInt("Enter item ID to update: ");
+
+        ClothingItem existing = dao.getById(id);
+        if (existing == null) {
+            System.out.println("No item found with ID: " + id);
             return;
         }
-        for (int i = 0; i < customers.size(); i++) {
-            Customer c = customers.get(i);
-            System.out.println((i + 1) + ") " + c.getProfile());
-        }
-    }
 
-    // ===================== ORDERS =====================
-    private void createOrder() {
-        System.out.println("\n--- CREATE ORDER ---");
+        System.out.println("Current:");
+        System.out.println(existing.getDisplayInfo());
+
+        // Press Enter to keep current (как в гайде Week 8 flow)
+        String newName = readOptional("New name [" + existing.getName() + "]: ");
+        if (newName.isEmpty()) newName = existing.getName();
+
+        String newSize = readOptional("New size [" + existing.getSize() + "]: ");
+        if (newSize.isEmpty()) newSize = existing.getSize();
+
+        String priceStr = readOptional("New price [" + existing.getPrice() + "]: ");
+        double newPrice = priceStr.isEmpty() ? existing.getPrice() : Double.parseDouble(priceStr);
+
+        String newBrand = readOptional("New brand [" + existing.getBrand() + "]: ");
+        if (newBrand.isEmpty()) newBrand = existing.getBrand();
+
+        String stockStr = readOptional("New stock [" + existing.getStockQuantity() + "]: ");
+        int newStock = stockStr.isEmpty() ? existing.getStockQuantity() : Integer.parseInt(stockStr);
+
         try {
-            int orderId = readInt("Order ID (>=0): ");
-            int customerId = readInt("Customer ID: ");
+            if ("SHIRT".equalsIgnoreCase(existing.getType())) {
+                Shirt old = (Shirt) existing; // не демонстрация, а нормальная логика update
+                String sleeveStr = readOptional("New sleeve (SHORT/LONG) [" + old.getSleeveType() + "]: ");
+                Shirt.SleeveType st = sleeveStr.isEmpty() ? old.getSleeveType() : Shirt.SleeveType.valueOf(sleeveStr.toUpperCase());
 
-            Customer customer = findCustomer(customerId);
-            if (customer == null) {
-                System.out.println("Customer not found.");
-                return;
+                String material = readOptional("New material [" + old.getMaterial() + "]: ");
+                if (material.isEmpty()) material = old.getMaterial();
+
+                Shirt updated = new Shirt(id, newName, newSize, newPrice, newBrand, newStock, st, material);
+                boolean ok = dao.updateShirt(updated);
+                System.out.println(ok ? "Updated ✅" : "Update failed ❌");
+
+            } else {
+                Pants old = (Pants) existing;
+                String fitStr = readOptional("New fit (SLIM/REGULAR/OVERSIZED) [" + old.getFitType() + "]: ");
+                Pants.FitType ft = fitStr.isEmpty() ? old.getFitType() : Pants.FitType.valueOf(fitStr.toUpperCase());
+
+                String waistStr = readOptional("New waist [" + old.getWaist() + "]: ");
+                int waist = waistStr.isEmpty() ? old.getWaist() : Integer.parseInt(waistStr);
+
+                String inseamStr = readOptional("New inseam [" + old.getInseam() + "]: ");
+                int inseam = inseamStr.isEmpty() ? old.getInseam() : Integer.parseInt(inseamStr);
+
+                String material = readOptional("New material [" + old.getMaterial() + "]: ");
+                if (material.isEmpty()) material = old.getMaterial();
+
+                Pants updated = new Pants(id, newName, newSize, newPrice, newBrand, newStock, ft, waist, inseam, material);
+                boolean ok = dao.updatePants(updated);
+                System.out.println(ok ? "Updated ✅" : "Update failed ❌");
             }
-
-            Order order = new Order(orderId, customer);
-            orders.add(order);
-            System.out.println("Created: " + order);
-
-        } catch (InvalidInputException | NumberFormatException e) {
-            System.out.println("Error: " + e.getMessage());
+        } catch (Exception e) {
+            System.out.println("Update error: " + e.getMessage());
         }
     }
 
-    private void addItemToOrder() {
-        System.out.println("\n--- ADD ITEM TO ORDER ---");
-        try {
-            int orderId = readInt("Order ID: ");
-            Order order = findOrder(orderId);
-            if (order == null) {
-                System.out.println("Order not found.");
-                return;
-            }
+    // ---------- DELETE (safe confirm) ----------
+    private void deleteItemSafe() {
+        System.out.println("\n--- DELETE ITEM ---");
+        int id = readInt("Enter item ID to delete: ");
 
-            int itemId = readInt("Item ID: ");
-            ClothingItem item = findItem(itemId);
-            if (item == null) {
-                System.out.println("Item not found.");
-                return;
-            }
-
-            int qty = readInt("Quantity (>0): ");
-
-            // Order.addItem может бросить InvalidInputException/IllegalStateException
-            order.addItem(item, qty);
-
-            System.out.println("Added. Order: " + order);
-            System.out.println("Item stock now: " + item.getStockQuantity());
-
-        } catch (InvalidInputException | IllegalStateException | NumberFormatException e) {
-            System.out.println("Error: " + e.getMessage());
-        }
-    }
-
-    private void viewAllOrders() {
-        System.out.println("\n--- ALL ORDERS ---");
-        if (orders.isEmpty()) {
-            System.out.println("No orders yet.");
+        ClothingItem existing = dao.getById(id);
+        if (existing == null) {
+            System.out.println("No item found with ID: " + id);
             return;
         }
-        for (int i = 0; i < orders.size(); i++) {
-            Order o = orders.get(i);
-            System.out.println((i + 1) + ") " + o);
-            o.printLines();
+
+        System.out.println("Item to delete:");
+        System.out.println(existing.getDisplayInfo());
+
+        String confirm = readNonEmpty("Are you sure? (yes/no): ");
+        if (!confirm.equalsIgnoreCase("yes")) {
+            System.out.println("Deletion cancelled.");
+            return;
         }
+
+        boolean ok = dao.deleteItem(id);
+        System.out.println(ok ? "Deleted ✅" : "Delete failed ❌");
     }
 
-    private void completeOrder() {
-        System.out.println("\n--- COMPLETE ORDER ---");
-        try {
-            int orderId = readInt("Order ID: ");
-            Order order = findOrder(orderId);
-            if (order == null) {
-                System.out.println("Order not found.");
-                return;
-            }
-            order.complete();
-            System.out.println("Updated: " + order);
+    // ---------- SEARCH ----------
+    private void searchByName() {
+        System.out.println("\n--- SEARCH BY NAME (ILIKE) ---");
+        String q = readNonEmpty("Enter name part: ");
+        List<ClothingItem> list = dao.searchByName(q);
+        printList(list);
+    }
 
-        } catch (IllegalStateException | NumberFormatException e) {
+    private void searchByRange() {
+        System.out.println("\n--- SEARCH BY PRICE RANGE (BETWEEN) ---");
+        double min = readDouble("Min price: ");
+        double max = readDouble("Max price: ");
+        List<ClothingItem> list = dao.searchByPriceRange(min, max);
+        printList(list);
+    }
+
+    private void searchByMin() {
+        System.out.println("\n--- SEARCH BY MIN PRICE (>=) ---");
+        double min = readDouble("Min price: ");
+        List<ClothingItem> list = dao.searchByMinPrice(min);
+        printList(list);
+    }
+
+    // ---------- Extra (stock) ----------
+    private void increaseStockById() {
+        System.out.println("\n--- INCREASE STOCK ---");
+        int id = readInt("Item ID: ");
+        ClothingItem existing = dao.getById(id);
+        if (existing == null) {
+            System.out.println("Not found.");
+            return;
+        }
+        int add = readInt("Add quantity: ");
+        int newStock = existing.getStockQuantity() + add;
+
+        // переиспользуем update: меняем только stock
+        // оставим остальные поля теми же
+        try {
+            if ("SHIRT".equalsIgnoreCase(existing.getType())) {
+                Shirt old = (Shirt) existing;
+                Shirt updated = new Shirt(old.getItemId(), old.getName(), old.getSize(), old.getPrice(), old.getBrand(),
+                        newStock, old.getSleeveType(), old.getMaterial());
+                System.out.println(dao.updateShirt(updated) ? "Stock updated ✅" : "Failed ❌");
+            } else {
+                Pants old = (Pants) existing;
+                Pants updated = new Pants(old.getItemId(), old.getName(), old.getSize(), old.getPrice(), old.getBrand(),
+                        newStock, old.getFitType(), old.getWaist(), old.getInseam(), old.getMaterial());
+                System.out.println(dao.updatePants(updated) ? "Stock updated ✅" : "Failed ❌");
+            }
+        } catch (Exception e) {
             System.out.println("Error: " + e.getMessage());
         }
     }
 
-    private void cancelOrder() {
-        System.out.println("\n--- CANCEL ORDER ---");
-        try {
-            int orderId = readInt("Order ID: ");
-            Order order = findOrder(orderId);
-            if (order == null) {
-                System.out.println("Order not found.");
-                return;
-            }
-            order.cancel();
-            System.out.println("Updated: " + order);
-
-        } catch (IllegalStateException | NumberFormatException e) {
-            System.out.println("Error: " + e.getMessage());
+    private void printList(List<ClothingItem> list) {
+        if (list.isEmpty()) {
+            System.out.println("No results.");
+            return;
+        }
+        for (int i = 0; i < list.size(); i++) {
+            System.out.println((i + 1) + ") " + list.get(i).getDisplayInfo());
         }
     }
 
-    // ===================== FINDERS =====================
-    private ClothingItem findItem(int itemId) {
-        for (int i = 0; i < items.size(); i++) {
-            if (items.get(i).getItemId() == itemId) return items.get(i);
-        }
-        return null;
-    }
-
-    private Customer findCustomer(int customerId) {
-        for (int i = 0; i < customers.size(); i++) {
-            if (customers.get(i).getCustomerId() == customerId) return customers.get(i);
-        }
-        return null;
-    }
-
-    private Order findOrder(int orderId) {
-        for (int i = 0; i < orders.size(); i++) {
-            if (orders.get(i).getOrderId() == orderId) return orders.get(i);
-        }
-        return null;
-    }
-
-    // ===================== INPUT HELPERS =====================
+    // ---------- input helpers ----------
     private int readInt(String prompt) {
         System.out.print(prompt);
         return Integer.parseInt(scanner.nextLine().trim());
@@ -306,6 +313,12 @@ public class MenuManager implements Menu {
         }
     }
 
+    private String readOptional(String prompt) {
+        System.out.print(prompt);
+        String s = scanner.nextLine();
+        return (s == null) ? "" : s.trim();
+    }
+
     private int readIntLine() {
         String s = scanner.nextLine().trim();
         try {
@@ -313,18 +326,5 @@ public class MenuManager implements Menu {
         } catch (NumberFormatException e) {
             return -1;
         }
-    }
-
-    // ===================== TEST DATA =====================
-    private void seedTestData() {
-        // Items
-        items.add(new Shirt(101, "Formal Shirt", "L", 26000, "Zara", 5, Shirt.SleeveType.LONG, "Cotton"));
-        items.add(new Pants(102, "Jeans", "34", 24000, "Levis", 3, Pants.FitType.REGULAR, 34, 32, "Denim"));
-
-        // Customers
-        customers.add(new Customer(5001, "Aruzhan", "M", 90));
-        customers.add(new Customer(5002, "Dias", "L", 120));
-
-        // Orders empty by default
     }
 }
