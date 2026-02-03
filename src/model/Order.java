@@ -1,25 +1,31 @@
 package model;
 
+import exception.InvalidInputException;
+
 import java.util.ArrayList;
 
 public class Order {
 
     public enum Status { PENDING, COMPLETED, CANCELLED }
 
+    // Внутренний класс — это НЕ новый файл, структуру не нарушает
     private static class Line {
-        private ClothingItem item;
+        private final ClothingItem item;
         private int quantity;
 
         Line(ClothingItem item, int quantity) {
+            if (item == null) throw new InvalidInputException("item cannot be null");
+            if (quantity <= 0) throw new InvalidInputException("quantity must be positive");
             this.item = item;
-            this.quantity = (quantity <= 0) ? 1 : quantity;
+            this.quantity = quantity;
         }
 
         ClothingItem getItem() { return item; }
         int getQuantity() { return quantity; }
 
         void addQuantity(int add) {
-            if (add > 0) quantity += add;
+            if (add <= 0) throw new InvalidInputException("add quantity must be positive");
+            quantity += add;
         }
 
         double getLineTotal() {
@@ -32,26 +38,24 @@ public class Order {
                     ", name='" + item.getName() + '\'' +
                     ", qty=" + quantity +
                     ", unitPrice=" + item.getPrice() +
-                    ", lineTotal=" + getLineTotal() + "}";
+                    ", total=" + getLineTotal() + '}';
         }
     }
 
     private int orderId;
     private Customer customer;
-    private ArrayList<Line> lines;
+    private final ArrayList<Line> lines = new ArrayList<Line>();
     private Status status;
 
     public Order(int orderId, Customer customer) {
         setOrderId(orderId);
         setCustomer(customer);
-        this.lines = new ArrayList<Line>();
         this.status = Status.PENDING;
     }
 
     public Order() {
         this.orderId = 0;
         this.customer = null;
-        this.lines = new ArrayList<Line>();
         this.status = Status.PENDING;
     }
 
@@ -60,106 +64,67 @@ public class Order {
     public Status getStatus() { return status; }
 
     public void setOrderId(int orderId) {
-        if (orderId < 0) {
-            System.out.println("Invalid orderId. Setting orderId = 0.");
-            this.orderId = 0;
-        } else {
-            this.orderId = orderId;
-        }
+        if (orderId < 0) throw new InvalidInputException("orderId must be >= 0");
+        this.orderId = orderId;
     }
 
     public void setCustomer(Customer customer) {
-        if (customer == null) {
-            System.out.println("Customer cannot be null.");
-            this.customer = null;
-        } else {
-            this.customer = customer;
-        }
+        if (customer == null) throw new InvalidInputException("customer cannot be null");
+        this.customer = customer;
     }
 
+    // extra methods (Week 2)
     public boolean isPending() {
         return status == Status.PENDING;
     }
 
     public double calculateTotal() {
         double sum = 0.0;
-        for (int i = 0; i < lines.size(); i++) {
-            sum += lines.get(i).getLineTotal();
-        }
+        for (int i = 0; i < lines.size(); i++) sum += lines.get(i).getLineTotal();
         return sum;
     }
 
-    public boolean addItem(ClothingItem item, int quantity) {
-        if (status != Status.PENDING) {
-            System.out.println("Cannot add items. Order is not PENDING.");
-            return false;
-        }
-        if (customer == null) {
-            System.out.println("Cannot add items without customer.");
-            return false;
-        }
-        if (item == null) {
-            System.out.println("Item cannot be null.");
-            return false;
-        }
-        if (quantity <= 0) {
-            System.out.println("Quantity must be positive.");
-            return false;
-        }
+    public void addItem(ClothingItem item, int quantity) {
+        if (status != Status.PENDING) throw new IllegalStateException("Order is not PENDING");
+        if (item == null) throw new InvalidInputException("item cannot be null");
+        if (quantity <= 0) throw new InvalidInputException("quantity must be positive");
 
-        // сначала списываем со склада (реальный магазин)
-        boolean reduced = item.reduceStock(quantity);
-        if (!reduced) return false;
+        // уменьшаем склад
+        item.reduceStock(quantity);
 
-        // если товар уже в заказе — просто увеличиваем qty
+        // если товар уже есть в заказе — просто увеличиваем количество
         for (int i = 0; i < lines.size(); i++) {
             Line line = lines.get(i);
             if (line.getItem().getItemId() == item.getItemId()) {
                 line.addQuantity(quantity);
-                return true;
+                return;
             }
         }
 
-        // иначе добавляем новую строку
         lines.add(new Line(item, quantity));
-        return true;
     }
 
     public void complete() {
-        if (status != Status.PENDING) {
-            System.out.println("Order cannot be completed. Current status: " + status);
-            return;
-        }
-        if (customer == null) {
-            System.out.println("Cannot complete order without customer.");
-            return;
-        }
-        if (lines.isEmpty()) {
-            System.out.println("Cannot complete empty order.");
-            return;
-        }
+        if (status != Status.PENDING) throw new IllegalStateException("Order cannot be completed (not PENDING)");
+        if (customer == null) throw new IllegalStateException("Order has no customer");
+        if (lines.isEmpty()) throw new IllegalStateException("Order is empty");
         status = Status.COMPLETED;
     }
 
     public void cancel() {
-        if (status != Status.PENDING) {
-            System.out.println("Order cannot be cancelled. Current status: " + status);
-            return;
-        }
+        if (status != Status.PENDING) throw new IllegalStateException("Order cannot be cancelled (not PENDING)");
 
-        // возвращаем stock обратно
+        // возвращаем склад
         for (int i = 0; i < lines.size(); i++) {
             Line line = lines.get(i);
             line.getItem().increaseStock(line.getQuantity());
         }
-
         status = Status.CANCELLED;
     }
 
-    // печать строк заказа для Main (без отдачи lines наружу)
     public void printLines() {
         if (lines.isEmpty()) {
-            System.out.println("   (empty order)");
+            System.out.println("   (empty)");
             return;
         }
         for (int i = 0; i < lines.size(); i++) {
@@ -172,7 +137,7 @@ public class Order {
         return "Order{" +
                 "orderId=" + orderId +
                 ", customer=" + (customer == null ? "null" : customer.getName()) +
-                ", linesCount=" + lines.size() +
+                ", lines=" + lines.size() +
                 ", total=" + calculateTotal() +
                 ", status=" + status +
                 '}';
