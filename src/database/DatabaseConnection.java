@@ -6,15 +6,20 @@ import java.sql.SQLException;
 
 public class DatabaseConnection {
 
-    // TODO: поменяй clothing_db на имя твоей БД
     private static final String URL = "jdbc:postgresql://localhost:5432/clothing_db";
     private static final String USER = "postgres";
     private static final String PASSWORD = "YOUR_PASSWORD_HERE";
 
     public static Connection getConnection() {
         try {
-            Connection c = DriverManager.getConnection(URL, USER, PASSWORD);
-            return c;
+            // Ensure driver is loaded (helps if classpath is weird)
+            Class.forName("org.postgresql.Driver");
+
+            return DriverManager.getConnection(URL, USER, PASSWORD);
+        } catch (ClassNotFoundException e) {
+            System.out.println("PostgreSQL JDBC Driver not found. Add postgresql JDBC jar/dependency.");
+            e.printStackTrace();
+            return null;
         } catch (SQLException e) {
             System.out.println("Connection failed!");
             e.printStackTrace();
@@ -32,4 +37,3 @@ public class DatabaseConnection {
         }
     }
 }
-
