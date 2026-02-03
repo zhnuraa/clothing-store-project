@@ -1,12 +1,21 @@
 package model;
 
-public class ClothingItem {
-    private int itemId;
-    private String name;
-    private String size;
-    private double price;
-    private String brand;
-    private int stockQuantity;
+import exception.InvalidInputException;
+
+/**
+ * Parent class (Week 4) -> becomes abstract (Week 6).
+ * Also implements an extra interface (Discountable) to satisfy Week 6.
+ */
+public abstract class ClothingItem implements Discountable {
+
+    // Week 4 checklist often asks for protected fields (min 4).
+    // We keep all core fields protected.
+    protected int itemId;
+    protected String name;
+    protected String size;
+    protected double price;
+    protected String brand;
+    protected int stockQuantity;
 
     public ClothingItem(int itemId, String name, String size, double price, String brand, int stockQuantity) {
         setItemId(itemId);
@@ -34,59 +43,47 @@ public class ClothingItem {
     public String getBrand() { return brand; }
     public int getStockQuantity() { return stockQuantity; }
 
-    // Setters (validation)
+    // Setters (Week 6: throw exceptions instead of printing)
     public void setItemId(int itemId) {
         if (itemId < 0) {
-            System.out.println("Invalid itemId. Setting itemId = 0.");
-            this.itemId = 0;
-        } else {
-            this.itemId = itemId;
+            throw new InvalidInputException("itemId must be >= 0");
         }
+        this.itemId = itemId;
     }
 
     public void setName(String name) {
         if (name == null || name.trim().isEmpty()) {
-            System.out.println("Invalid name. Setting name = 'Unknown Item'.");
-            this.name = "Unknown Item";
-        } else {
-            this.name = name.trim();
+            throw new InvalidInputException("name cannot be empty");
         }
+        this.name = name.trim();
     }
 
     public void setSize(String size) {
         if (size == null || size.trim().isEmpty()) {
-            System.out.println("Invalid size. Setting size = 'N/A'.");
-            this.size = "N/A";
-        } else {
-            this.size = size.trim();
+            throw new InvalidInputException("size cannot be empty");
         }
+        this.size = size.trim();
     }
 
     public void setPrice(double price) {
         if (price < 0) {
-            System.out.println("Invalid price. Setting price = 0.0.");
-            this.price = 0.0;
-        } else {
-            this.price = price;
+            throw new InvalidInputException("price must be >= 0");
         }
+        this.price = price;
     }
 
     public void setBrand(String brand) {
         if (brand == null || brand.trim().isEmpty()) {
-            System.out.println("Invalid brand. Setting brand = 'No Brand'.");
-            this.brand = "No Brand";
-        } else {
-            this.brand = brand.trim();
+            throw new InvalidInputException("brand cannot be empty");
         }
+        this.brand = brand.trim();
     }
 
     public void setStockQuantity(int stockQuantity) {
         if (stockQuantity < 0) {
-            System.out.println("Invalid stock. Setting stockQuantity = 0.");
-            this.stockQuantity = 0;
-        } else {
-            this.stockQuantity = stockQuantity;
+            throw new InvalidInputException("stockQuantity must be >= 0");
         }
+        this.stockQuantity = stockQuantity;
     }
 
     // Week 3 store logic
@@ -100,12 +97,10 @@ public class ClothingItem {
 
     public boolean reduceStock(int amount) {
         if (amount <= 0) {
-            System.out.println("Amount must be positive.");
-            return false;
+            throw new InvalidInputException("amount must be positive");
         }
         if (amount > stockQuantity) {
-            System.out.println("Not enough stock. Available: " + stockQuantity);
-            return false;
+            throw new InvalidInputException("not enough stock. Available: " + stockQuantity);
         }
         stockQuantity -= amount;
         return true;
@@ -113,19 +108,17 @@ public class ClothingItem {
 
     public void increaseStock(int amount) {
         if (amount <= 0) {
-            System.out.println("Amount must be positive.");
-            return;
+            throw new InvalidInputException("amount must be positive");
         }
         stockQuantity += amount;
     }
 
-    // ===== Week 4 polymorphism (children override these) =====
-    public String getType() {
-        return "ClothingItem";
-    }
+    // ===== Week 4 / Week 6 polymorphism =====
+    // Week 6 requires at least one abstract method.
+    public abstract String getType();
 
     public String getCareInstructions() {
-        return "Standard care: wash at 30°C, do not bleach.";
+        return "Standard care: wash at 30C, do not bleach.";
     }
 
     public String getDisplayInfo() {
@@ -136,6 +129,25 @@ public class ClothingItem {
                 ", price=" + price +
                 ", brand='" + brand + '\'' +
                 ", stock=" + stockQuantity;
+    }
+
+    // ===== Week 6 extra interface (Discountable) =====
+    @Override
+    public void applyDiscount(double percent) {
+        if (percent < 0 || percent > 100) {
+            throw new InvalidInputException("discount percent must be between 0 and 100");
+        }
+        double multiplier = (100.0 - percent) / 100.0;
+        this.price = this.price * multiplier;
+    }
+
+    @Override
+    public double calculateDiscountedPrice(double percent) {
+        if (percent < 0 || percent > 100) {
+            throw new InvalidInputException("discount percent must be between 0 and 100");
+        }
+        double multiplier = (100.0 - percent) / 100.0;
+        return this.price * multiplier;
     }
 
     @Override
