@@ -30,7 +30,7 @@ public class Pants extends ClothingItem {
 
     @Override
     public String getType() {
-        return "Pants";
+        return "PANTS";
     }
 
     public FitType getFitType() { return fitType; }
@@ -56,17 +56,6 @@ public class Pants extends ClothingItem {
     public void setMaterial(String material) {
         if (material == null || material.trim().isEmpty()) throw new InvalidInputException("material cannot be empty");
         this.material = material.trim();
-    }
-
-    // extra logic methods (Week 2)
-    public boolean isJeans() {
-        return "denim".equalsIgnoreCase(material);
-    }
-
-    public String sizeAdvice() {
-        if (fitType == FitType.SLIM) return "Slim fit: consider +1 size if you prefer comfort.";
-        if (fitType == FitType.OVERSIZED) return "Oversized: true-to-size is usually loose.";
-        return "Regular: true-to-size is recommended.";
     }
 
     @Override
