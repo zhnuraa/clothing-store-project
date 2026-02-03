@@ -1,5 +1,7 @@
 package model;
 
+import exception.InvalidInputException;
+
 public class Pants extends ClothingItem {
 
     public enum FitType { SLIM, REGULAR, OVERSIZED }
@@ -26,73 +28,54 @@ public class Pants extends ClothingItem {
         this.material = "Denim";
     }
 
+    @Override
+    public String getType() {
+        return "Pants";
+    }
+
     public FitType getFitType() { return fitType; }
     public int getWaist() { return waist; }
     public int getInseam() { return inseam; }
     public String getMaterial() { return material; }
 
     public void setFitType(FitType fitType) {
-        if (fitType == null) {
-            System.out.println("Invalid fitType. Setting REGULAR.");
-            this.fitType = FitType.REGULAR;
-        } else {
-            this.fitType = fitType;
-        }
+        if (fitType == null) throw new InvalidInputException("fitType cannot be null");
+        this.fitType = fitType;
     }
 
     public void setWaist(int waist) {
-        if (waist <= 0) {
-            System.out.println("Invalid waist. Setting 32.");
-            this.waist = 32;
-        } else {
-            this.waist = waist;
-        }
+        if (waist <= 0) throw new InvalidInputException("waist must be > 0");
+        this.waist = waist;
     }
 
     public void setInseam(int inseam) {
-        if (inseam <= 0) {
-            System.out.println("Invalid inseam. Setting 32.");
-            this.inseam = 32;
-        } else {
-            this.inseam = inseam;
-        }
+        if (inseam <= 0) throw new InvalidInputException("inseam must be > 0");
+        this.inseam = inseam;
     }
 
     public void setMaterial(String material) {
-        if (material == null || material.trim().isEmpty()) {
-            System.out.println("Invalid material. Setting 'Denim'.");
-            this.material = "Denim";
-        } else {
-            this.material = material.trim();
-        }
+        if (material == null || material.trim().isEmpty()) throw new InvalidInputException("material cannot be empty");
+        this.material = material.trim();
     }
 
-    // Polymorphic behavior (overrides)
-    @Override
-    public String getType() {
-        return "Pants";
+    // extra logic methods (Week 2)
+    public boolean isJeans() {
+        return "denim".equalsIgnoreCase(material);
     }
 
-    @Override
-    public String getCareInstructions() {
-        if (material.equalsIgnoreCase("denim")) {
-            return "Denim care: wash inside-out, cold water, air dry.";
-        }
-        return "Pants care: wash at 30°C, do not bleach.";
+    public String sizeAdvice() {
+        if (fitType == FitType.SLIM) return "Slim fit: consider +1 size if you prefer comfort.";
+        if (fitType == FitType.OVERSIZED) return "Oversized: true-to-size is usually loose.";
+        return "Regular: true-to-size is recommended.";
     }
 
     @Override
     public String getDisplayInfo() {
         return super.getDisplayInfo() +
-                ", fitType=" + fitType +
+                ", fit=" + fitType +
                 ", waist=" + waist +
                 ", inseam=" + inseam +
                 ", material='" + material + "'";
-    }
-
-    // Child-only method (for instanceof + casting demo)
-    public void sizeAdvice() {
-        System.out.println("Pants advice: fit=" + fitType + ", waist=" + waist + ", inseam=" + inseam);
     }
 
     @Override
