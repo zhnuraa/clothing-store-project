@@ -24,7 +24,7 @@ public class Shirt extends ClothingItem {
 
     @Override
     public String getType() {
-        return "Shirt";
+        return "SHIRT";
     }
 
     public SleeveType getSleeveType() { return sleeveType; }
@@ -38,16 +38,6 @@ public class Shirt extends ClothingItem {
     public void setMaterial(String material) {
         if (material == null || material.trim().isEmpty()) throw new InvalidInputException("material cannot be empty");
         this.material = material.trim();
-    }
-
-    // extra logic methods (Week 2)
-    public boolean isFormal() {
-        return getPrice() >= 25000.0 && sleeveType == SleeveType.LONG;
-    }
-
-    public String getCareInstructions() {
-        if ("wool".equalsIgnoreCase(material)) return "Wool: hand wash cold, air dry.";
-        return "Wash at 30C, iron low heat.";
     }
 
     @Override
