@@ -1,5 +1,7 @@
 package model;
 
+import exception.InvalidInputException;
+
 public class Shirt extends ClothingItem {
 
     public enum SleeveType { SHORT, LONG }
@@ -20,51 +22,37 @@ public class Shirt extends ClothingItem {
         this.material = "Cotton";
     }
 
-    public SleeveType getSleeveType() { return sleeveType; }
-    public String getMaterial() { return material; }
-
-    public void setSleeveType(SleeveType sleeveType) {
-        if (sleeveType == null) {
-            System.out.println("Invalid sleeveType. Setting SHORT.");
-            this.sleeveType = SleeveType.SHORT;
-        } else {
-            this.sleeveType = sleeveType;
-        }
-    }
-
-    public void setMaterial(String material) {
-        if (material == null || material.trim().isEmpty()) {
-            System.out.println("Invalid material. Setting 'Cotton'.");
-            this.material = "Cotton";
-        } else {
-            this.material = material.trim();
-        }
-    }
-
-    // Polymorphic behavior (overrides)
     @Override
     public String getType() {
         return "Shirt";
     }
 
-    @Override
+    public SleeveType getSleeveType() { return sleeveType; }
+    public String getMaterial() { return material; }
+
+    public void setSleeveType(SleeveType sleeveType) {
+        if (sleeveType == null) throw new InvalidInputException("sleeveType cannot be null");
+        this.sleeveType = sleeveType;
+    }
+
+    public void setMaterial(String material) {
+        if (material == null || material.trim().isEmpty()) throw new InvalidInputException("material cannot be empty");
+        this.material = material.trim();
+    }
+
+    // extra logic methods (Week 2)
+    public boolean isFormal() {
+        return getPrice() >= 25000.0 && sleeveType == SleeveType.LONG;
+    }
+
     public String getCareInstructions() {
-        if (material.equalsIgnoreCase("wool")) {
-            return "Wool care: hand wash cold, air dry.";
-        }
-        return "Shirt care: wash at 30°C, iron low heat.";
+        if ("wool".equalsIgnoreCase(material)) return "Wool: hand wash cold, air dry.";
+        return "Wash at 30C, iron low heat.";
     }
 
     @Override
     public String getDisplayInfo() {
-        return super.getDisplayInfo() +
-                ", sleeveType=" + sleeveType +
-                ", material='" + material + "'";
-    }
-
-    // Child-only method (for instanceof + casting demo)
-    public void foldSleeves() {
-        System.out.println("Shirt action: folding sleeves (" + sleeveType + ").");
+        return super.getDisplayInfo() + ", sleeve=" + sleeveType + ", material='" + material + "'";
     }
 
     @Override
