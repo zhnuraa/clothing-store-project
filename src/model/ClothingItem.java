@@ -4,8 +4,6 @@ import exception.InvalidInputException;
 
 public abstract class ClothingItem {
 
-    // Можно private (лучше по ООП), но Week4 иногда любит protected.
-    // Я оставляю private — так инкапсуляция сильнее.
     private int itemId;
     private String name;
     private String size;
@@ -31,10 +29,9 @@ public abstract class ClothingItem {
         this.stockQuantity = 0;
     }
 
-    // ===== abstract (Week 6 requirement) =====
+    // Week 6: abstract method
     public abstract String getType();
 
-    // ===== Getters =====
     public int getItemId() { return itemId; }
     public String getName() { return name; }
     public String getSize() { return size; }
@@ -42,7 +39,6 @@ public abstract class ClothingItem {
     public String getBrand() { return brand; }
     public int getStockQuantity() { return stockQuantity; }
 
-    // ===== Setters (Week 6: throw exceptions) =====
     public void setItemId(int itemId) {
         if (itemId < 0) throw new InvalidInputException("itemId must be >= 0");
         this.itemId = itemId;
@@ -73,7 +69,6 @@ public abstract class ClothingItem {
         this.stockQuantity = stockQuantity;
     }
 
-    // ===== Extra methods (Week 2 / Week 3 logic) =====
     public boolean isPremium() {
         return price >= 35000.0;
     }
