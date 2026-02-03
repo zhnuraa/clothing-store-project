@@ -1,6 +1,7 @@
 package menu;
 
 import model.*;
+import exception.InvalidInputException;
 
 import java.util.ArrayList;
 import java.util.Scanner;
@@ -13,218 +14,215 @@ public class MenuManager implements Menu {
     private final ArrayList<Customer> customers = new ArrayList<Customer>();
     private final ArrayList<Order> orders = new ArrayList<Order>();
 
-    public MenuManager() {
-        System.out.println("=== Clothing Store Management System (Clean Main + MenuManager) ===");
-        seedTestData();
-    }
-
     @Override
     public void displayMenu() {
-        System.out.println("\n--- MENU ---");
-        System.out.println("1) Add Clothing Item");
-        System.out.println("2) View All Items");
-        System.out.println("3) Add Customer");
-        System.out.println("4) View All Customers");
-        System.out.println("5) Create Order");
-        System.out.println("6) Add Item to Order");
-        System.out.println("7) View All Orders");
-        System.out.println("8) Complete Order");
-        System.out.println("9) Cancel Order");
-        System.out.println("10) Demonstrate Polymorphism");
-        System.out.println("11) Demonstrate instanceof + Casting");
+        System.out.println("\n===============================");
+        System.out.println(" CLOTHING STORE SYSTEM");
+        System.out.println("===============================");
+        System.out.println("1) Add Shirt");
+        System.out.println("2) Add Pants");
+        System.out.println("3) View All Items");
+        System.out.println("4) Add Customer");
+        System.out.println("5) View All Customers");
+        System.out.println("6) Create Order");
+        System.out.println("7) Add Item To Order");
+        System.out.println("8) View All Orders");
+        System.out.println("9) Complete Order");
+        System.out.println("10) Cancel Order");
         System.out.println("0) Exit");
+        System.out.print("Enter choice: ");
     }
 
     @Override
     public void run() {
-        boolean running = true;
+        seedTestData();
 
+        boolean running = true;
         while (running) {
             displayMenu();
-            int choice = readInt("Choose option: ");
+            int choice = readIntLine();
 
             switch (choice) {
-                case 1:
-                    addClothingItem();
-                    break;
-                case 2:
-                    viewAllItems();
-                    break;
-                case 3:
-                    addCustomer();
-                    break;
-                case 4:
-                    viewAllCustomers();
-                    break;
-                case 5:
-                    createOrder();
-                    break;
-                case 6:
-                    addItemToOrder();
-                    break;
-                case 7:
-                    viewAllOrders();
-                    break;
-                case 8:
-                    completeOrder();
-                    break;
-                case 9:
-                    cancelOrder();
-                    break;
-                case 10:
-                    demonstratePolymorphism();
-                    break;
-                case 11:
-                    demonstrateInstanceofCasting();
-                    break;
+                case 1: addShirt(); break;
+                case 2: addPants(); break;
+                case 3: viewAllItems(); break;
+                case 4: addCustomer(); break;
+                case 5: viewAllCustomers(); break;
+                case 6: createOrder(); break;
+                case 7: addItemToOrder(); break;
+                case 8: viewAllOrders(); break;
+                case 9: completeOrder(); break;
+                case 10: cancelOrder(); break;
                 case 0:
                     running = false;
-                    System.out.println("Exiting... Bye!");
+                    System.out.println("Bye!");
                     break;
                 default:
-                    System.out.println("Invalid option. Try again.");
+                    System.out.println("Invalid choice!");
                     break;
             }
         }
     }
 
-    // ---------------- ITEMS ----------------
-    private void addClothingItem() {
-        System.out.println("\n--- Add Clothing Item ---");
-        System.out.println("Choose item type:");
-        System.out.println("1) Generic ClothingItem");
-        System.out.println("2) Shirt (child)");
-        System.out.println("3) Pants (child)");
+    // ===================== ADD SHIRT =====================
+    private void addShirt() {
+        System.out.println("\n--- ADD SHIRT ---");
+        try {
+            int id = readInt("Item ID (>=0): ");
+            String name = readNonEmpty("Name: ");
+            String size = readNonEmpty("Size (M/L/XL...): ");
+            double price = readDouble("Price (>=0): ");
+            String brand = readNonEmpty("Brand: ");
+            int stock = readInt("Stock (>=0): ");
 
-        int typeChoice = readInt("Type: ");
+            int sleeveChoice = readInt("Sleeve (1=SHORT, 2=LONG): ");
+            Shirt.SleeveType sleeve = (sleeveChoice == 2) ? Shirt.SleeveType.LONG : Shirt.SleeveType.SHORT;
 
-        int id = readInt("Item ID (>=0): ");
-        String name = readNonEmptyString("Name: ");
-        String size = readNonEmptyString("Size (e.g., M, L, 34): ");
-        double price = readDouble("Price (KZT, >=0): ");
-        String brand = readNonEmptyString("Brand: ");
-        int stock = readInt("Stock quantity (>=0): ");
+            String material = readNonEmpty("Material: ");
 
-        ClothingItem item;
+            Shirt shirt = new Shirt(id, name, size, price, brand, stock, sleeve, material);
+            items.add(shirt);
 
-        if (typeChoice == 2) {
-            int sleeve = readInt("Sleeve type (1=SHORT, 2=LONG): ");
-            Shirt.SleeveType st = (sleeve == 2) ? Shirt.SleeveType.LONG : Shirt.SleeveType.SHORT;
-            String material = readNonEmptyString("Material (e.g., Cotton, Wool): ");
+            System.out.println("Added: " + shirt.getDisplayInfo());
 
-            item = new Shirt(id, name, size, price, brand, stock, st, material);
-
-        } else if (typeChoice == 3) {
-            int fit = readInt("Fit type (1=SLIM, 2=REGULAR, 3=OVERSIZED): ");
-            Pants.FitType ft;
-            if (fit == 1) ft = Pants.FitType.SLIM;
-            else if (fit == 3) ft = Pants.FitType.OVERSIZED;
-            else ft = Pants.FitType.REGULAR;
-
-            int waist = readInt("Waist (e.g., 32): ");
-            int inseam = readInt("Inseam (e.g., 32): ");
-            String material = readNonEmptyString("Material (e.g., Denim): ");
-
-            item = new Pants(id, name, size, price, brand, stock, ft, waist, inseam, material);
-
-        } else {
-            item = new ClothingItem(id, name, size, price, brand, stock);
+        } catch (InvalidInputException | NumberFormatException e) {
+            System.out.println("Error: " + e.getMessage());
         }
+    }
 
-        items.add(item);
-        System.out.println("Added: " + item.getDisplayInfo());
+    // ===================== ADD PANTS =====================
+    private void addPants() {
+        System.out.println("\n--- ADD PANTS ---");
+        try {
+            int id = readInt("Item ID (>=0): ");
+            String name = readNonEmpty("Name: ");
+            String size = readNonEmpty("Size (e.g., 34): ");
+            double price = readDouble("Price (>=0): ");
+            String brand = readNonEmpty("Brand: ");
+            int stock = readInt("Stock (>=0): ");
+
+            int fitChoice = readInt("Fit (1=SLIM, 2=REGULAR, 3=OVERSIZED): ");
+            Pants.FitType fit;
+            if (fitChoice == 1) fit = Pants.FitType.SLIM;
+            else if (fitChoice == 3) fit = Pants.FitType.OVERSIZED;
+            else fit = Pants.FitType.REGULAR;
+
+            int waist = readInt("Waist (>0): ");
+            int inseam = readInt("Inseam (>0): ");
+            String material = readNonEmpty("Material: ");
+
+            Pants pants = new Pants(id, name, size, price, brand, stock, fit, waist, inseam, material);
+            items.add(pants);
+
+            System.out.println("Added: " + pants.getDisplayInfo());
+
+        } catch (InvalidInputException | NumberFormatException e) {
+            System.out.println("Error: " + e.getMessage());
+        }
     }
 
     private void viewAllItems() {
-        System.out.println("\n--- All Items ---");
+        System.out.println("\n--- ALL ITEMS ---");
         if (items.isEmpty()) {
             System.out.println("No items yet.");
             return;
         }
         for (int i = 0; i < items.size(); i++) {
-            System.out.println((i + 1) + ") " + items.get(i).getDisplayInfo());
+            ClothingItem item = items.get(i);
+            System.out.println((i + 1) + ") " + item.getDisplayInfo() +
+                    " | premium=" + item.isPremium() +
+                    " | inStock=" + item.isInStock());
         }
     }
 
-    // ---------------- CUSTOMERS ----------------
+    // ===================== CUSTOMERS =====================
     private void addCustomer() {
-        System.out.println("\n--- Add Customer ---");
-        int id = readInt("Customer ID (>=0): ");
-        String name = readNonEmptyString("Name: ");
-        String preferredSize = readNonEmptyString("Preferred size: ");
-        int points = readInt("Initial points (>=0): ");
+        System.out.println("\n--- ADD CUSTOMER ---");
+        try {
+            int id = readInt("Customer ID (>=0): ");
+            String name = readNonEmpty("Name: ");
+            String pref = readNonEmpty("Preferred size: ");
+            int points = readInt("Points (>=0): ");
 
-        Customer customer = new Customer(id, name, preferredSize, points);
-        customers.add(customer);
+            Customer c = new Customer(id, name, pref, points);
+            customers.add(c);
+            System.out.println("Added: " + c.getProfile());
 
-        System.out.println("Added: " + customer);
+        } catch (InvalidInputException | NumberFormatException e) {
+            System.out.println("Error: " + e.getMessage());
+        }
     }
 
     private void viewAllCustomers() {
-        System.out.println("\n--- All Customers ---");
+        System.out.println("\n--- ALL CUSTOMERS ---");
         if (customers.isEmpty()) {
             System.out.println("No customers yet.");
             return;
         }
         for (int i = 0; i < customers.size(); i++) {
             Customer c = customers.get(i);
-            System.out.println((i + 1) + ") " + c + " | VIP=" + c.isVIP());
+            System.out.println((i + 1) + ") " + c.getProfile());
         }
     }
 
-    // ---------------- ORDERS ----------------
+    // ===================== ORDERS =====================
     private void createOrder() {
-        System.out.println("\n--- Create Order ---");
-        int orderId = readInt("Order ID (>=0): ");
-        int customerId = readInt("Customer ID: ");
+        System.out.println("\n--- CREATE ORDER ---");
+        try {
+            int orderId = readInt("Order ID (>=0): ");
+            int customerId = readInt("Customer ID: ");
 
-        Customer customer = findCustomerById(customerId);
-        if (customer == null) {
-            System.out.println("Customer not found.");
-            return;
+            Customer customer = findCustomer(customerId);
+            if (customer == null) {
+                System.out.println("Customer not found.");
+                return;
+            }
+
+            Order order = new Order(orderId, customer);
+            orders.add(order);
+            System.out.println("Created: " + order);
+
+        } catch (InvalidInputException | NumberFormatException e) {
+            System.out.println("Error: " + e.getMessage());
         }
-
-        Order order = new Order(orderId, customer);
-        orders.add(order);
-
-        System.out.println("Created: " + order);
     }
 
     private void addItemToOrder() {
-        System.out.println("\n--- Add Item To Order ---");
-        int orderId = readInt("Order ID: ");
-        Order order = findOrderById(orderId);
-        if (order == null) {
-            System.out.println("Order not found.");
-            return;
-        }
+        System.out.println("\n--- ADD ITEM TO ORDER ---");
+        try {
+            int orderId = readInt("Order ID: ");
+            Order order = findOrder(orderId);
+            if (order == null) {
+                System.out.println("Order not found.");
+                return;
+            }
 
-        int itemId = readInt("Item ID: ");
-        ClothingItem item = findItemById(itemId);
-        if (item == null) {
-            System.out.println("Item not found.");
-            return;
-        }
+            int itemId = readInt("Item ID: ");
+            ClothingItem item = findItem(itemId);
+            if (item == null) {
+                System.out.println("Item not found.");
+                return;
+            }
 
-        int qty = readInt("Quantity: ");
-        boolean ok = order.addItem(item, qty);
+            int qty = readInt("Quantity (>0): ");
 
-        if (ok) {
-            System.out.println("Added successfully.");
-            System.out.println("Order now: " + order);
+            // Order.addItem может бросить InvalidInputException/IllegalStateException
+            order.addItem(item, qty);
+
+            System.out.println("Added. Order: " + order);
             System.out.println("Item stock now: " + item.getStockQuantity());
-        } else {
-            System.out.println("Failed to add item (check stock/status/inputs).");
+
+        } catch (InvalidInputException | IllegalStateException | NumberFormatException e) {
+            System.out.println("Error: " + e.getMessage());
         }
     }
 
     private void viewAllOrders() {
-        System.out.println("\n--- All Orders ---");
+        System.out.println("\n--- ALL ORDERS ---");
         if (orders.isEmpty()) {
             System.out.println("No orders yet.");
             return;
         }
-
         for (int i = 0; i < orders.size(); i++) {
             Order o = orders.get(i);
             System.out.println((i + 1) + ") " + o);
@@ -233,146 +231,100 @@ public class MenuManager implements Menu {
     }
 
     private void completeOrder() {
-        System.out.println("\n--- Complete Order ---");
-        int orderId = readInt("Order ID: ");
-        Order order = findOrderById(orderId);
-        if (order == null) {
-            System.out.println("Order not found.");
-            return;
-        }
+        System.out.println("\n--- COMPLETE ORDER ---");
+        try {
+            int orderId = readInt("Order ID: ");
+            Order order = findOrder(orderId);
+            if (order == null) {
+                System.out.println("Order not found.");
+                return;
+            }
+            order.complete();
+            System.out.println("Updated: " + order);
 
-        order.complete();
-        System.out.println("Updated: " + order);
+        } catch (IllegalStateException | NumberFormatException e) {
+            System.out.println("Error: " + e.getMessage());
+        }
     }
 
     private void cancelOrder() {
-        System.out.println("\n--- Cancel Order ---");
-        int orderId = readInt("Order ID: ");
-        Order order = findOrderById(orderId);
-        if (order == null) {
-            System.out.println("Order not found.");
-            return;
-        }
-
-        order.cancel();
-        System.out.println("Updated: " + order);
-    }
-
-    // ---------------- WEEK 4 DEMO ----------------
-    private void demonstratePolymorphism() {
-        System.out.println("\n--- Polymorphism Demo ---");
-        System.out.println("Same method calls, different behavior because of @Override.\n");
-
-        if (items.isEmpty()) {
-            System.out.println("No items yet.");
-            return;
-        }
-
-        for (int i = 0; i < items.size(); i++) {
-            ClothingItem item = items.get(i);
-            System.out.println("Item #" + (i + 1));
-            System.out.println("  getType(): " + item.getType());
-            System.out.println("  getCareInstructions(): " + item.getCareInstructions());
-            System.out.println("  getDisplayInfo(): " + item.getDisplayInfo());
-            System.out.println();
-        }
-    }
-
-    private void demonstrateInstanceofCasting() {
-        System.out.println("\n--- instanceof + Casting Demo ---");
-        int itemId = readInt("Enter itemId to inspect: ");
-
-        ClothingItem item = findItemById(itemId);
-        if (item == null) {
-            System.out.println("Item not found.");
-            return;
-        }
-
-        System.out.println("Selected: " + item.getDisplayInfo());
-
-        if (item instanceof Shirt) {
-            Shirt s = (Shirt) item;
-            System.out.println("This is a Shirt. Calling Shirt-only method:");
-            s.foldSleeves();
-
-        } else if (item instanceof Pants) {
-            Pants p = (Pants) item;
-            System.out.println("This is Pants. Calling Pants-only method:");
-            p.sizeAdvice();
-
-        } else {
-            System.out.println("This is a generic ClothingItem.");
-        }
-    }
-
-    // ---------------- HELPERS ----------------
-    private ClothingItem findItemById(int id) {
-        for (int i = 0; i < items.size(); i++) {
-            if (items.get(i).getItemId() == id) return items.get(i);
-        }
-        return null;
-    }
-
-    private Customer findCustomerById(int id) {
-        for (int i = 0; i < customers.size(); i++) {
-            if (customers.get(i).getCustomerId() == id) return customers.get(i);
-        }
-        return null;
-    }
-
-    private Order findOrderById(int id) {
-        for (int i = 0; i < orders.size(); i++) {
-            if (orders.get(i).getOrderId() == id) return orders.get(i);
-        }
-        return null;
-    }
-
-    // ---------------- INPUT ----------------
-    private int readInt(String prompt) {
-        while (true) {
-            System.out.print(prompt);
-            String line = scanner.nextLine().trim();
-            try {
-                return Integer.parseInt(line);
-            } catch (NumberFormatException e) {
-                System.out.println("Please enter a valid integer.");
+        System.out.println("\n--- CANCEL ORDER ---");
+        try {
+            int orderId = readInt("Order ID: ");
+            Order order = findOrder(orderId);
+            if (order == null) {
+                System.out.println("Order not found.");
+                return;
             }
+            order.cancel();
+            System.out.println("Updated: " + order);
+
+        } catch (IllegalStateException | NumberFormatException e) {
+            System.out.println("Error: " + e.getMessage());
         }
+    }
+
+    // ===================== FINDERS =====================
+    private ClothingItem findItem(int itemId) {
+        for (int i = 0; i < items.size(); i++) {
+            if (items.get(i).getItemId() == itemId) return items.get(i);
+        }
+        return null;
+    }
+
+    private Customer findCustomer(int customerId) {
+        for (int i = 0; i < customers.size(); i++) {
+            if (customers.get(i).getCustomerId() == customerId) return customers.get(i);
+        }
+        return null;
+    }
+
+    private Order findOrder(int orderId) {
+        for (int i = 0; i < orders.size(); i++) {
+            if (orders.get(i).getOrderId() == orderId) return orders.get(i);
+        }
+        return null;
+    }
+
+    // ===================== INPUT HELPERS =====================
+    private int readInt(String prompt) {
+        System.out.print(prompt);
+        return Integer.parseInt(scanner.nextLine().trim());
     }
 
     private double readDouble(String prompt) {
+        System.out.print(prompt);
+        return Double.parseDouble(scanner.nextLine().trim());
+    }
+
+    private String readNonEmpty(String prompt) {
         while (true) {
             System.out.print(prompt);
-            String line = scanner.nextLine().trim();
-            try {
-                return Double.parseDouble(line);
-            } catch (NumberFormatException e) {
-                System.out.println("Please enter a valid number.");
-            }
+            String s = scanner.nextLine();
+            if (s != null && !s.trim().isEmpty()) return s.trim();
+            System.out.println("Value cannot be empty.");
         }
     }
 
-    private String readNonEmptyString(String prompt) {
-        while (true) {
-            System.out.print(prompt);
-            String line = scanner.nextLine();
-            if (line != null && !line.trim().isEmpty()) {
-                return line.trim();
-            }
-            System.out.println("This value cannot be empty.");
+    private int readIntLine() {
+        String s = scanner.nextLine().trim();
+        try {
+            return Integer.parseInt(s);
+        } catch (NumberFormatException e) {
+            return -1;
         }
     }
 
-    // ---------------- TEST DATA ----------------
+    // ===================== TEST DATA =====================
     private void seedTestData() {
-        items.add(new ClothingItem(101, "Hoodie", "M", 42000.0, "Nike", 5));
-        items.add(new Shirt(102, "Formal Shirt", "L", 26000.0, "Zara", 4,
-                Shirt.SleeveType.LONG, "Cotton"));
-        items.add(new Pants(103, "Jeans", "34", 24000.0, "Levi's", 2,
-                Pants.FitType.REGULAR, 34, 32, "Denim"));
+        // Items
+        items.add(new Shirt(101, "Formal Shirt", "L", 26000, "Zara", 5, Shirt.SleeveType.LONG, "Cotton"));
+        items.add(new Pants(102, "Jeans", "34", 24000, "Levis", 3, Pants.FitType.REGULAR, 34, 32, "Denim"));
 
-        customers.add(new Customer(5001, "Aruzhan Bek", "M", 90));
-        customers.add(new Customer(5002, "Dias Nur", "L", 120));
+        // Customers
+        customers.add(new Customer(5001, "Aruzhan", "M", 90));
+        customers.add(new Customer(5002, "Dias", "L", 120));
+
+        // Orders empty by default
     }
 }
-
