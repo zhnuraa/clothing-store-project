@@ -2,7 +2,7 @@ package model;
 
 import exception.InvalidInputException;
 
-public abstract class ClothingItem {
+public abstract class ClothingItem implements Discountable {
 
     private int itemId;
     private String name;
@@ -86,6 +86,14 @@ public abstract class ClothingItem {
         if (amount <= 0) throw new InvalidInputException("amount must be positive");
         if (amount > stockQuantity) throw new InvalidInputException("Not enough stock. Available: " + stockQuantity);
         stockQuantity -= amount;
+    }
+
+    @Override
+    public double getDiscountedPrice(double percent) {
+        if (percent < 0 || percent > 100) {
+            throw new InvalidInputException("percent must be in range 0..100");
+        }
+        return price * (1.0 - percent / 100.0);
     }
 
     public String getDisplayInfo() {
